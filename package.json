@@ -2,8 +2,9 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/server.js",
   "scripts": {
+    "start": "node ./src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,9 +14,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Holdwich/api-nodejs/issues"
   },
-  "homepage": "https://github.com/Holdwich/api-nodejs#readme"
+  "homepage": "https://github.com/Holdwich/api-nodejs#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
