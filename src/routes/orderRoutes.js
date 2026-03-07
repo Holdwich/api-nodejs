@@ -1,33 +1,17 @@
 import express from 'express';
+import { createOrder, getOrderById, getOrders, deleteOrderById } from '../controllers/orderController.js';
 
 const app = express();
 const router = express.Router();
 
 // declaração de rotas
 
-router.post('/order', (req, res) => {
-    console.log("Criação de pedido");
-    res.status(201).json({ message: "Pedido criado com sucesso!" });
-});
+router.post('/order', createOrder);
 
-router.get('/order/:id', (req, res) => {
-    const orderId = req.params.id;
-    console.log(`Consulta de pedido ${orderId}`);
-    res.status(200).json({ id: orderId, item: "Produto Exemplo", quantity: 1, value: 100.00 });
-});
+router.get('/order/list', getOrders);
 
-router.get('/order/list', (req, res) => {
-    console.log("Listagem de todos os pedidos");
-    res.status(200).json([
-        { id: 1, item: "Produto Exemplo", quantity: 1, value: 100.00 },
-        { id: 2, item: "Outro Produto", quantity: 2, value: 200.00 }
-    ]);
-});
+router.get('/order/:id', getOrderById);
 
-router.delete('/order/:id', (req, res) => {
-    const orderId = req.params.id;
-    console.log(`Exclusão de pedido ${orderId}`);
-    res.status(200).json({ message: `Pedido ${orderId} excluído com sucesso!` });
-});
+router.delete('/order/:id', deleteOrderById);
 
 export default router;

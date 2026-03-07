@@ -16,6 +16,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.error('Erro ao conectar no banco de dados:', err.message)
   } else {
     console.log('Conectado ao banco de dados')
+
+    // habilitação do suporte a chaves estrangeiras no SQLite
+    db.run("PRAGMA foreign_keys = ON");
   }
 })
 
