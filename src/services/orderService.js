@@ -40,8 +40,8 @@ export async function createOrder(orderData) {
             throw new Error(`ID do item ${item.idItem} deve ser um número inteiro positivo`);
         }
 
-        if (typeof item.valorItem !== "number") {
-            throw new Error(`Valor do item ${item.idItem} deve ser um número`);
+        if (typeof item.valorItem !== "number" || item.valorItem <= 0) {
+            throw new Error(`Valor do item ${item.idItem} deve ser um número positivo`);
         }
     }
 

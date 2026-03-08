@@ -37,37 +37,38 @@ export async function createOrderWithItems(orderData) {
     // extrai os dados do pedido
     const { numeroPedido, valorTotal, dataCriacao, items } = orderData;
 
-    // inicia uma transação para garantir a atomicidade da operação
     try {
 
+        // inicia uma transação para garantir a atomicidade da operação
         await runAsync("BEGIN TRANSACTION");
 
+        // insere o pedido na tabela de pedidos com seus itens relacionados na tabela de itens
         await runAsync(
-        `INSERT INTO orders (orderId, value, creationDate)
-        VALUES (?, ?, ?)`,
-        [numeroPedido, valorTotal, dataCriacao]
+          `INSERT INTO orders (orderId, value, creationDate)
+          VALUES (?, ?, ?)`,
+          [numeroPedido, valorTotal, dataCriacao]
         );
 
         for (const item of items) {
 
-        await runAsync(
-            `INSERT INTO items (orderId, productId, quantity, price)
-            VALUES (?, ?, ?, ?)`,
-            [
-            numeroPedido,
-            item.idItem,
-            item.quantidadeItem,
-            item.valorItem
-            ]
-        );
+          await runAsync(
+              `INSERT INTO items (orderId, productId, quantity, price)
+              VALUES (?, ?, ?, ?)`,
+              [
+              numeroPedido,
+              item.idItem,
+              item.quantidadeItem,
+              item.valorItem
+              ]
+          );
         }
 
         await runAsync("COMMIT");
 
         return orderData;
 
-    // em caso de erro, realiza o rollback da transação
     } catch (error) {
+        // em caso de erro, realiza o rollback da transação
         await runAsync("ROLLBACK");
         throw new Error("Erro ao criar o pedido no banco de dados");
     }
@@ -78,28 +79,31 @@ export async function getOrderById(orderId) {
     try {
         // busca o pedido no banco de dados com o devido ID
         const order = await getAsync(
-        `SELECT orderId, value, creationDate
-        FROM orders
-        WHERE orderId = ?`,
-        [orderId]
+          `SELECT orderId, value, creationDate
+          FROM orders
+          WHERE orderId = ?`,
+          [orderId]
         );
 
+        // se o pedido não for encontrado, retorna null
         if (!order) {
-        return null;
+          return null;
         }
 
+        // busca os itens relacionados ao pedido encontrado
         const items = await allAsync(
-        `SELECT productId, quantity, price
-        FROM items
-        WHERE orderId = ?`,
-        [orderId]
+          `SELECT productId, quantity, price
+          FROM items
+          WHERE orderId = ?`,
+          [orderId]
         );
 
+        // organização dos dados do pedido e seus itens para retorno
         return {
-        orderId: order.orderId,
-        value: order.value,
-        creationDate: order.creationDate,
-        items: items
+          orderId: order.orderId,
+          value: order.value,
+          creationDate: order.creationDate,
+          items: items
         };
 
     } catch (error) {
@@ -112,34 +116,34 @@ export async function getOrders() {
     try {
         // busca todos os pedidos e seus itens no banco de dados
         const orders = await allAsync(`
-        SELECT orderId, value, creationDate
-        FROM orders
+          SELECT orderId, value, creationDate
+          FROM orders
         `);
 
         const items = await allAsync(`
-        SELECT orderId, productId, quantity, price
-        FROM items
+          SELECT orderId, productId, quantity, price
+          FROM items
         `);
 
-        // organização dos pedidos e seus itens
+        // organização dos pedidos e seus itens para retorno, agrupando os itens pelo ID do pedido
         const ordersMap = {};
 
         for (const order of orders) {
-        ordersMap[order.orderId] = {
-            orderId: order.orderId,
-            value: order.value,
-            creationDate: order.creationDate,
-            items: []
-        };
+          ordersMap[order.orderId] = {
+              orderId: order.orderId,
+              value: order.value,
+              creationDate: order.creationDate,
+              items: []
+          };
         }
 
         // se o item pertencer a um pedido existente, adiciona o item à lista de itens do pedido correspondente
         for (const item of items) {
             if (ordersMap[item.orderId]) {
                 ordersMap[item.orderId].items.push({
-                productId: item.productId,
-                quantity: item.quantity,
-                price: item.price
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  price: item.price
                 });
             }
         }
